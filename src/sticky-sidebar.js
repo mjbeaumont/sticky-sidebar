@@ -14,7 +14,7 @@ const StickySidebar = (() => {
   const VERSION   = '2.0';
 
   const DEFAULTS = {
-    
+
     /**
      * Additional top spacing of the element when it becomes sticky.
      * @type {Numeric|Function}
@@ -110,7 +110,7 @@ const StickySidebar = (() => {
       this._initialized = false;
       this._breakpoint = false;
       this._resizeListeners = [];
-      
+
       // Dimenstions of sidebar, container and screen viewport.
       this.dimensions = {
         translateY: 0,
@@ -121,7 +121,7 @@ const StickySidebar = (() => {
         containerTop: 0,
         containerHeight: 0,
         viewportHeight: 0,
-        viewportTop: 0, 
+        viewportTop: 0,
         lastViewportTop: 0,
       };
 
@@ -135,7 +135,7 @@ const StickySidebar = (() => {
     }
 
     /**
-     * Initializes the sticky sidebar by adding inner wrapper, define its container, 
+     * Initializes the sticky sidebar by adding inner wrapper, define its container,
      * min-width breakpoint, calculating dimenstions, adding helper classes and inline style.
      * @private
      */
@@ -149,7 +149,7 @@ const StickySidebar = (() => {
         if( null !== this.sidebarInner )
           this.sidebarInner = false;
       }
-      
+
       if( ! this.sidebarInner ){
         let wrapper = document.createElement('div');
         wrapper.setAttribute('class', 'inner-wrapper-sticky');
@@ -164,14 +164,14 @@ const StickySidebar = (() => {
       // If there's no specific container, user parent of sidebar as container.
       if( null !== this.container )
         this.container = this.sidebar.parentElement;
-      
+
       // If top/bottom spacing is not function parse value to integer.
       if( 'function' !== typeof this.options.topSpacing )
         this.options.topSpacing = parseInt(this.options.topSpacing) || 0;
 
       if( 'function' !== typeof this.options.bottomSpacing )
         this.options.bottomSpacing = parseInt(this.options.bottomSpacing) || 0;
-          
+
       // Breakdown sticky sidebar if screen width below `options.minWidth`.
       this._widthBreakpoint();
 
@@ -183,7 +183,7 @@ const StickySidebar = (() => {
 
       // Bind all events.
       this.bindEvents();
-      
+
       // Inform other properties the sticky sidebar is initialized.
       this._initialized = true;
     }
@@ -220,15 +220,18 @@ const StickySidebar = (() => {
       if( this._breakpoint ) return;
       var dims = this.dimensions;
 
+      // CUSTOM
+      var paddingFix = parseInt(window.getComputedStyle(this.container,null).getPropertyValue("padding-top"));
+
       // Container of sticky sidebar dimensions.
-      dims.containerTop    = StickySidebar.offsetRelative(this.container).top;
+      dims.containerTop    = StickySidebar.offsetRelative(this.container).top + paddingFix;
       dims.containerHeight = this.container.clientHeight;
-      dims.containerBottom = dims.containerTop + dims.containerHeight;
+      dims.containerBottom = dims.containerTop + dims.containerHeight - paddingFix;
 
       // Sidebar dimensions.
       dims.sidebarHeight = this.sidebarInner.offsetHeight;
       dims.sidebarWidth  = this.sidebar.offsetWidth;
-      
+
       // Screen viewport dimensions.
       dims.viewportHeight = window.innerHeight;
 
@@ -257,14 +260,14 @@ const StickySidebar = (() => {
       if( 'function' === typeof dims.bottomSpacing )
           dims.bottomSpacing = parseInt(dims.bottomSpacing(this.sidebar)) || 0;
     }
-    
+
     /**
      * Detarmine wheather the sidebar is bigger than viewport.
      * @public
      * @return {Boolean}
      */
     isSidebarFitsViewport(){
-      return this.dimensions.sidebarHeight < this.dimensions.viewportHeight;
+      return this.dimensions.sidebarHeight + this.options.topSpacing < this.dimensions.viewportHeight;
     }
 
     /**
@@ -275,7 +278,7 @@ const StickySidebar = (() => {
       if( dims.lastViewportTop === dims.viewportTop ) return;
 
       var furthest = 'down' === this.direction ? Math.min : Math.max;
-      
+
       // If the browser is scrolling not in the same direction.
       if( dims.viewportTop === furthest(dims.viewportTop, dims.lastViewportTop) )
         this.direction = 'down' === this.direction ?  'up' : 'down';
@@ -283,7 +286,7 @@ const StickySidebar = (() => {
 
     /**
      * Gets affix type of sidebar according to current scrollTop and scrollLeft.
-     * Holds all logical affix of the sidebar when scrolling up and down and when sidebar 
+     * Holds all logical affix of the sidebar when scrolling up and down and when sidebar
      * is bigger than viewport and vice versa.
      * @public
      * @return {String|False} - Proper affix type.
@@ -317,7 +320,7 @@ const StickySidebar = (() => {
 
           if( dims.sidebarHeight + colliderTop >= dims.containerBottom ){
             dims.translateY = dims.containerBottom - sidebarBottom;
-            affixType = 'CONTAINER-BOTTOM'; 
+            affixType = 'CONTAINER-BOTTOM';
 
           } else if( colliderTop >= dims.containerTop ){
             dims.translateY = colliderTop - dims.containerTop;
@@ -325,15 +328,15 @@ const StickySidebar = (() => {
           }
         // When sidebar element is bigger than screen viewport.
         } else {
-    
+
           if( dims.containerBottom <= colliderBottom ){
-            dims.translateY = dims.containerBottom - sidebarBottom; 
-            affixType = 'CONTAINER-BOTTOM';    
+            dims.translateY = dims.containerBottom - sidebarBottom;
+            affixType = 'CONTAINER-BOTTOM';
 
           } else if( sidebarBottom + dims.translateY <= colliderBottom ){
             dims.translateY = colliderBottom - sidebarBottom;
             affixType = 'VIEWPORT-BOTTOM';
-          
+
           } else if( dims.containerTop + dims.translateY <= colliderTop ){
             affixType = 'VIEWPORT-UNBOTTOM';
           }
@@ -349,7 +352,7 @@ const StickySidebar = (() => {
     }
 
     /**
-     * Gets inline style of sticky sidebar wrapper and inner wrapper according 
+     * Gets inline style of sticky sidebar wrapper and inner wrapper according
      * to its affix type.
      * @private
      * @param {String} affixType - Affix type of sticky sidebar.
@@ -373,14 +376,14 @@ const StickySidebar = (() => {
         case 'CONTAINER-BOTTOM':
         case 'VIEWPORT-UNBOTTOM':
           let translate = this._getTranslate(0, dims.translateY + 'px');
-          
+
           if( translate )
             style.inner = {transform: translate};
-          else 
+          else
             style.inner = {position: 'absolute', top: dims.containerTop + dims.translateY};
           break;
       }
-      
+
       switch( affixType ){
         case 'VIEWPORT-TOP':
         case 'VIEWPORT-BOTTOM':
@@ -396,7 +399,7 @@ const StickySidebar = (() => {
 
       return style;
     }
-   
+
     /**
      * Cause the sidebar to be sticky according to affix type by adding inline
      * style, adding helper class and trigger events.
@@ -408,13 +411,13 @@ const StickySidebar = (() => {
       if( this._breakpoint ) return;
 
       force = force || false;
-      
+
       var offsetTop = this.options.topSpacing;
       var offsetBottom = this.options.bottomSpacing;
 
       var affixType = this.getAffixType();
       var style = this._getStyle(affixType);
-      
+
       if( (this.affixedType != affixType || force) && affixType ){
         let affixEvent = 'affix.' + affixType.toLowerCase().replace('viewport-', '') + EVENT_KEY;
         StickySidebar.eventTrigger(this.sidebar, affixEvent);
@@ -423,7 +426,7 @@ const StickySidebar = (() => {
           this.sidebar.classList.remove(this.options.stickyClass);
         else
           this.sidebar.classList.add(this.options.stickyClass);
-        
+
         for( let key in style.outer ){
           let _unit = ('number' === typeof style.outer[key]) ? 'px' : '';
           this.sidebar.style[key] = style.outer[key];
@@ -462,19 +465,19 @@ const StickySidebar = (() => {
     }
 
     /**
-     * Switchs between functions stack for each event type, if there's no 
+     * Switchs between functions stack for each event type, if there's no
      * event, it will re-initialize sticky sidebar.
      * @public
      */
     updateSticky(event = {}){
       if( this._running ) return;
       this._running = true;
-      
+
       ((eventType) => {
         requestAnimationFrame(() => {
           switch( eventType ){
             // When browser is scrolling and re-calculate just dimensions
-            // within scroll. 
+            // within scroll.
             case 'scroll':
               this._calcDimensionsWithScroll();
               this.observeScrollDir();
@@ -484,7 +487,7 @@ const StickySidebar = (() => {
             // When browser is resizing or there's no event, observe width
             // breakpoint and re-calculate dimensions.
             case 'resize':
-            default: 
+            default:
               this._widthBreakpoint();
               this.calcDimensions();
               this.stickyPosition('resize' === eventType || false);
@@ -523,15 +526,15 @@ const StickySidebar = (() => {
     /**
      * Add resize sensor listener to specifc element.
      * @public
-     * @param {DOMElement} element - 
-     * @param {Function} callback - 
+     * @param {DOMElement} element -
+     * @param {Function} callback -
      */
     addResizerListener(element, callback){
       if( ! element.resizeListeners ){
         element.resizeListeners = [];
         this._appendResizeSensor(element);
       }
-        
+
       element.resizeListeners.push(callback);
     }
 
@@ -539,8 +542,8 @@ const StickySidebar = (() => {
      * Remove resize sonser listener from specific element.
      * @function
      * @public
-     * @param {DOMElement} element - 
-     * @param {Function} callback - 
+     * @param {DOMElement} element -
+     * @param {Function} callback -
      */
     removeResizeListener(element, callback){
       var resizeListeners = element.resizeListeners;
@@ -560,7 +563,7 @@ const StickySidebar = (() => {
     /**
      * Append resize sensor object on DOM in specific element.
      * @private
-     * @param {DOMElement} element - 
+     * @param {DOMElement} element -
      */
     _appendResizeSensor(element){
 
@@ -568,7 +571,7 @@ const StickySidebar = (() => {
         element.style.position = 'relative';
 
       var wrapper = document.createElement('object');
-      var style = 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%;' + 
+      var style = 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%;' +
           'overflow: hidden; pointer-events: none; z-index: -1;';
 
       wrapper.setAttribute('style', style);
@@ -584,20 +587,20 @@ const StickySidebar = (() => {
       wrapper.type = 'text/html';
 
       if( StickySidebar.isIE() ) wrapper.data = 'about:blank';
-      
+
       element.resizeTrigger = wrapper;
       element.appendChild(wrapper);
     }
 
     /**
      * Resize sensor listener to call callbacks of trigger.
-     * @private 
+     * @private
      * @param {Object} event - Event object passed from listener.
      */
     _resizeListener(event){
       var _window = event.target || event.srcElement;
       var trigger = _window.resizeTrigger;
-        
+
       trigger.resizeListeners.forEach((callback) => {
         if( 'object' === typeof callback ){
             callback = callback.handleEvent;
@@ -668,7 +671,7 @@ const StickySidebar = (() => {
      * @static
      * @param {DOMObject} element - Target element on the DOM.
      * @param {String} eventName - Event name.
-     * @param {Object} data - 
+     * @param {Object} data -
      */
     static eventTrigger(element, eventName, data){
       if (window.CustomEvent) {

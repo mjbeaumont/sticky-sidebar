@@ -13,34 +13,34 @@ var stickySidebarModule = (function () {
  */
 
 (function(window) {
-	var lastTime = 0,
-		vendors = ['webkit', 'moz'],
-		requestAnimationFrame = window.requestAnimationFrame,
-		cancelAnimationFrame = window.cancelAnimationFrame,
-		i = vendors.length;
+  var lastTime = 0,
+    vendors = ['webkit', 'moz'],
+    requestAnimationFrame = window.requestAnimationFrame,
+    cancelAnimationFrame = window.cancelAnimationFrame,
+    i = vendors.length;
 
-	// try to un-prefix existing raf
-	while (--i >= 0 && !requestAnimationFrame) {
-		requestAnimationFrame = window[vendors[i] + 'RequestAnimationFrame'];
-		cancelAnimationFrame = window[vendors[i] + 'CancelAnimationFrame'];
-	}
+  // try to un-prefix existing raf
+  while (--i >= 0 && !requestAnimationFrame) {
+    requestAnimationFrame = window[vendors[i] + 'RequestAnimationFrame'];
+    cancelAnimationFrame = window[vendors[i] + 'CancelAnimationFrame'];
+  }
 
-	// polyfill with setTimeout fallback
-	// heavily inspired from @darius gist mod: https://gist.github.com/paulirish/1579671#comment-837945
-	if (!requestAnimationFrame || !cancelAnimationFrame) {
-		requestAnimationFrame = function(callback) {
-			var now = +new Date(), nextTime = Math.max(lastTime + 16, now);
-			return setTimeout(function() {
-				callback(lastTime = nextTime);
-			}, nextTime - now);
-		};
+  // polyfill with setTimeout fallback
+  // heavily inspired from @darius gist mod: https://gist.github.com/paulirish/1579671#comment-837945
+  if (!requestAnimationFrame || !cancelAnimationFrame) {
+    requestAnimationFrame = function(callback) {
+      var now = +new Date(), nextTime = Math.max(lastTime + 16, now);
+      return setTimeout(function() {
+        callback(lastTime = nextTime);
+      }, nextTime - now);
+    };
 
-		cancelAnimationFrame = clearTimeout;
-	}
+    cancelAnimationFrame = clearTimeout;
+  }
 
-	// export to window
-	window.requestAnimationFrame = requestAnimationFrame;
-	window.cancelAnimationFrame = cancelAnimationFrame;
+  // export to window
+  window.requestAnimationFrame = requestAnimationFrame;
+  window.cancelAnimationFrame = cancelAnimationFrame;
 }(window));
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -189,7 +189,7 @@ var StickySidebar = function () {
     }
 
     /**
-     * Initializes the sticky sidebar by adding inner wrapper, define its container, 
+     * Initializes the sticky sidebar by adding inner wrapper, define its container,
      * min-width breakpoint, calculating dimenstions, adding helper classes and inline style.
      * @private
      */
@@ -282,10 +282,13 @@ var StickySidebar = function () {
         if (this._breakpoint) return;
         var dims = this.dimensions;
 
+        // CUSTOM
+        var paddingFix = parseInt(window.getComputedStyle(this.container,null).getPropertyValue("padding-top"));
+
         // Container of sticky sidebar dimensions.
-        dims.containerTop = StickySidebar.offsetRelative(this.container).top;
+        dims.containerTop = StickySidebar.offsetRelative(this.container).top + paddingFix;
         dims.containerHeight = this.container.clientHeight;
-        dims.containerBottom = dims.containerTop + dims.containerHeight;
+        dims.containerBottom = dims.containerTop + dims.containerHeight - paddingFix;
 
         // Sidebar dimensions.
         dims.sidebarHeight = this.sidebarInner.offsetHeight;
@@ -293,6 +296,8 @@ var StickySidebar = function () {
 
         // Screen viewport dimensions.
         dims.viewportHeight = window.innerHeight;
+
+        console.log(dims)
 
         this._calcDimensionsWithScroll();
       }
@@ -351,7 +356,7 @@ var StickySidebar = function () {
 
       /**
        * Gets affix type of sidebar according to current scrollTop and scrollLeft.
-       * Holds all logical affix of the sidebar when scrolling up and down and when sidebar 
+       * Holds all logical affix of the sidebar when scrolling up and down and when sidebar
        * is bigger than viewport and vice versa.
        * @public
        * @return {String|False} - Proper affix type.
@@ -416,7 +421,7 @@ var StickySidebar = function () {
       }
 
       /**
-       * Gets inline style of sticky sidebar wrapper and inner wrapper according 
+       * Gets inline style of sticky sidebar wrapper and inner wrapper according
        * to its affix type.
        * @private
        * @param {String} affixType - Affix type of sticky sidebar.
@@ -532,7 +537,7 @@ var StickySidebar = function () {
       }
 
       /**
-       * Switchs between functions stack for each event type, if there's no 
+       * Switchs between functions stack for each event type, if there's no
        * event, it will re-initialize sticky sidebar.
        * @public
        */
@@ -551,7 +556,7 @@ var StickySidebar = function () {
           requestAnimationFrame(function () {
             switch (eventType) {
               // When browser is scrolling and re-calculate just dimensions
-              // within scroll. 
+              // within scroll.
               case 'scroll':
                 _this2._calcDimensionsWithScroll();
                 _this2.observeScrollDir();
@@ -608,8 +613,8 @@ var StickySidebar = function () {
       /**
        * Add resize sensor listener to specifc element.
        * @public
-       * @param {DOMElement} element - 
-       * @param {Function} callback - 
+       * @param {DOMElement} element -
+       * @param {Function} callback -
        */
 
     }, {
@@ -627,8 +632,8 @@ var StickySidebar = function () {
        * Remove resize sonser listener from specific element.
        * @function
        * @public
-       * @param {DOMElement} element - 
-       * @param {Function} callback - 
+       * @param {DOMElement} element -
+       * @param {Function} callback -
        */
 
     }, {
@@ -651,7 +656,7 @@ var StickySidebar = function () {
       /**
        * Append resize sensor object on DOM in specific element.
        * @private
-       * @param {DOMElement} element - 
+       * @param {DOMElement} element -
        */
 
     }, {
@@ -684,7 +689,7 @@ var StickySidebar = function () {
 
       /**
        * Resize sensor listener to call callbacks of trigger.
-       * @private 
+       * @private
        * @param {Object} event - Event object passed from listener.
        */
 
@@ -774,7 +779,7 @@ var StickySidebar = function () {
        * @static
        * @param {DOMObject} element - Target element on the DOM.
        * @param {String} eventName - Event name.
-       * @param {Object} data - 
+       * @param {Object} data -
        */
 
     }, {
