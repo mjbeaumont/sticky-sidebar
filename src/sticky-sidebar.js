@@ -222,11 +222,12 @@ const StickySidebar = (() => {
 
       // CUSTOM
       var paddingFix = parseInt(window.getComputedStyle(this.container,null).getPropertyValue("padding-top"));
+      var paddingBottomFix = parseInt(window.getComputedStyle(this.container,null).getPropertyValue("padding-bottom"));
 
       // Container of sticky sidebar dimensions.
       dims.containerTop    = StickySidebar.offsetRelative(this.container).top + paddingFix;
       dims.containerHeight = this.container.clientHeight;
-      dims.containerBottom = dims.containerTop + dims.containerHeight - paddingFix;
+      dims.containerBottom = dims.containerTop + dims.containerHeight - paddingFix - paddingBottomFix;
 
       // Sidebar dimensions.
       dims.sidebarHeight = this.sidebarInner.offsetHeight;
